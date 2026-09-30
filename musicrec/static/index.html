@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>MusicRec</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #181818;
+            --hover: #282828;
+            --fg: #fff;
+            --mut: #b3b3b3;
+            --g: #1db954
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font: 14px system-ui;
+            padding-bottom: 110px
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: #000c;
+            backdrop-filter: blur(8px);
+            padding: 14px 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+            align-items: center
+        }
+
+        input,
+        select {
+            background: #242424;
+            border: 0;
+            color: var(--fg);
+            padding: 10px 14px;
+            border-radius: 20px;
+            outline: 0
+        }
+
+        input[type=text] {
+            flex: 1
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px
+        }
+
+        @media(max-width:800px) {
+            main {
+                grid-template-columns: 1fr
+            }
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 16px
+        }
+
+        section {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 14px;
+            max-height: 75vh;
+            overflow: auto
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer
+        }
+
+        .row:hover {
+            background: var(--hover)
+        }
+
+        .row.cur {
+            color: var(--g)
+        }
+
+        .sub {
+            color: var(--mut);
+            font-size: 12px
+        }
+
+        .tag {
+            font-size: 11px;
+            background: #333;
+            border-radius: 10px;
+            padding: 2px 8px;
+            margin-left: 4px;
+            white-space: nowrap
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            padding: 12px 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center
+        }
+
+        audio {
+            flex: 1
+        }
+
+        label {
+            color: var(--mut);
+            white-space: nowrap
+        }
+    </style>
+</head>
+
+<body>
+    <header><input type="text" id="q" placeholder="Search songs…" autofocus>
+        <select id="lang">
+            <option value="">All languages</option>
+        </select>
+        <label><input type="checkbox" id="strict"> strict language</label>
+    </header>
+    <main>
+        <section>
+            <h2>Library</h2>
+            <div id="lib"></div>
+        </section>
+        <section>
+            <h2>Up next — similar to <span id="seed">…</span></h2>
+            <div id="rec"></div>
+        </section>
+    </main>
+    <footer>
+        <div id="now" style="min-width:220px">Nothing playing</div><audio id="a" controls></audio>
+    </footer>
+    <script>
+        const $ = s => document.querySelector(s), a = $('#a');
+        const session = localStorage.sid || (localStorage.sid = crypto.randomUUID());
+        let recent = [], queue = [], cur = null;
+        const fmt = s => s ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '';
+        const esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+        const row = (s, extra = '') => `<div class="row ${cur == s.id ? 'cur' : ''}" data-id="${s.id}"><div>${esc(s.title)}<div class="sub">${esc(s.artist || s.folder)} · ${esc(s.lang_guess.join(', '))}</div></div>
+<div><span class="tag">${esc(s.language)}</span><span class="tag">${esc(s.mood)}</span>${extra}<span class="sub"> ${fmt(s.duration)}</span></div></div>`;
+        const j = async (u, o) => (await fetch(u, o)).json();
+        async function search() {
+            const r = await j(`/api/search?q=${encodeURIComponent($('#q').value)}&language=${encodeURIComponent($('#lang').value)}&limit=60`);
+            $('#lib').innerHTML = r.map(s => row(s)).join(''); bind('#lib', r)
+        }
+        function bind(sel, list) { document.querySelectorAll(sel + ' .row').forEach(e => e.onclick = () => play(list.find(x => x.id == e.dataset.id))) }
+        const post = b => fetch('/api/play', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+        async function play(s) {
+            cur = s.id; a.src = '/api/stream/' + s.id; a.play(); $('#now').textContent = s.title; $('#seed').textContent = s.title;
+            const seeds = recent.slice(-3).reverse().join(','); recent.push(s.id); post({ session, song: s.id });
+            queue = await j(`/api/similar/${s.id}?k=25&strict_language=${$('#strict').checked}&seeds=${seeds}`);
+            $('#rec').innerHTML = queue.map(x => row(x, `<span class="tag">${x.score}</span>`)).join(''); bind('#rec', queue)
+        }
+        a.onended = () => { post({ session, song: cur, completed: true }); if (queue.length) play(queue.shift()) };
+        $('#q').oninput = search; $('#lang').onchange = search;
+        (async () => { const st = await j('/api/languages'); Object.keys(st).sort().forEach(l => $('#lang').insertAdjacentHTML('beforeend', `<option value="${esc(l)}">${esc(l)} (${st[l].count})</option>`)); search() })();
+    </script>
+</body>
+
+</html>

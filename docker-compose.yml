@@ -1,0 +1,36 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: musicrec
+      POSTGRES_PASSWORD: musicrec
+      POSTGRES_DB: musicrec
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"      # psql -h 127.0.0.1 -p 5433 -U musicrec musicrec
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U musicrec -d musicrec"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://musicrec:musicrec@db:5432/musicrec
+      MUSIC_DIR: /music
+      WORKERS: ${WORKERS:-4}
+      LANG_K: ${LANG_K:-0}
+    volumes:
+      - ${MUSIC_DIR:-${HOME}/Music/songs}:/music:ro
+      - models:/models
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:
+  models:
