@@ -1,183 +1,2361 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>MusicRec</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#080808">
+    <meta name="color-scheme" content="dark">
+    <title>MusicRec — Discover Your Sound</title>
+
     <style>
         :root {
-            --bg: #121212;
-            --card: #181818;
-            --hover: #282828;
-            --fg: #fff;
-            --mut: #b3b3b3;
-            --g: #1db954
+            --bg: #080808;
+            --bg-2: #101010;
+            --surface: #151515;
+            --surface-2: #1c1c1c;
+            --surface-3: #242424;
+            --surface-hover: #2b2b2b;
+            --text: #fff;
+            --text-2: #b3b3b3;
+            --text-3: #777;
+            --accent: #1ed760;
+            --accent-2: #1db954;
+            --danger: #ff5c5c;
+            --warning: #ffca28;
+            --border: rgba(255, 255, 255, .07);
+            --shadow: 0 20px 60px rgba(0, 0, 0, .4);
+            --radius: 14px;
+            --player-height: 92px;
+            --sidebar-width: 240px;
         }
 
         * {
-            box-sizing: border-box
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
-            background: var(--bg);
-            color: var(--fg);
-            font: 14px system-ui;
-            padding-bottom: 110px
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 20% -10%, rgba(29, 185, 84, .12), transparent 35%),
+                radial-gradient(circle at 100% 10%, rgba(80, 80, 255, .06), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            padding-bottom: calc(var(--player-height) + 20px);
+            overflow-x: hidden;
         }
 
-        header {
-            position: sticky;
-            top: 0;
-            background: #000c;
-            backdrop-filter: blur(8px);
-            padding: 14px 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 5;
-            align-items: center
-        }
-
+        button,
         input,
         select {
-            background: #242424;
+            font: inherit;
+        }
+
+        button {
             border: 0;
-            color: var(--fg);
-            padding: 10px 14px;
-            border-radius: 20px;
-            outline: 0
         }
 
-        input[type=text] {
-            flex: 1
-        }
+        /* =========================
+           APP SHELL
+        ========================== */
 
-        main {
+        .app {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px
+            grid-template-columns: var(--sidebar-width) 1fr;
+            min-height: 100vh;
         }
 
-        @media(max-width:800px) {
-            main {
-                grid-template-columns: 1fr
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar-width);
+            padding: 24px 14px;
+            background: rgba(5, 5, 5, .92);
+            border-right: 1px solid var(--border);
+            z-index: 20;
+            backdrop-filter: blur(20px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 5px 12px 30px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px rgba(29, 215, 96, .3);
+            animation: brandPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes brandPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(29, 215, 96, .15);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(29, 215, 96, .4);
             }
         }
 
-        h2 {
-            margin: 0 0 10px;
-            font-size: 16px
+        .nav-title {
+            padding: 0 12px 8px;
+            color: var(--text-3);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
 
-        section {
-            background: var(--card);
-            border-radius: 10px;
-            padding: 14px;
-            max-height: 75vh;
-            overflow: auto
-        }
-
-        .row {
+        .nav {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav button {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            width: 100%;
+            padding: 11px 12px;
+            color: var(--text-2);
+            background: transparent;
+            border-radius: 10px;
+            text-align: left;
+            cursor: pointer;
+            transition:
+                color .2s ease,
+                background .2s ease,
+                transform .2s ease;
+        }
+
+        .nav button:hover {
+            color: white;
+            background: var(--surface);
+            transform: translateX(3px);
+        }
+
+        .nav button.active {
+            color: white;
+            background: var(--surface-2);
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .content {
+            grid-column: 2;
+            min-width: 0;
+            padding: 0 0 30px;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 30px;
+            background: rgba(8, 8, 8, .78);
+            border-bottom: 1px solid transparent;
+            backdrop-filter: blur(18px);
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        .topbar.scrolled {
+            border-color: var(--border);
+            background: rgba(8, 8, 8, .92);
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 650px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-3);
+            pointer-events: none;
+        }
+
+        #q {
+            width: 100%;
+            height: 44px;
+            padding: 0 45px;
+            color: white;
+            background: var(--surface-2);
+            border: 1px solid transparent;
+            border-radius: 24px;
+            outline: none;
+            transition:
+                border-color .2s ease,
+                background .2s ease,
+                box-shadow .2s ease;
+        }
+
+        #q::placeholder {
+            color: #777;
+        }
+
+        #q:focus {
+            background: var(--surface-3);
+            border-color: rgba(255, 255, 255, .12);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, .025);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: var(--text-2);
+            background: transparent;
+            cursor: pointer;
+            display: none;
+        }
+
+        .clear-search:hover {
+            color: white;
+            background: rgba(255, 255, 255, .1);
+        }
+
+        .filters {
+            display: flex;
+            align-items: center;
             gap: 8px;
-            padding: 8px 10px;
-            border-radius: 6px;
-            cursor: pointer
         }
 
-        .row:hover {
-            background: var(--hover)
+        #lang {
+            height: 42px;
+            padding: 0 35px 0 14px;
+            color: var(--text-2);
+            background: var(--surface-2);
+            border: 1px solid transparent;
+            border-radius: 22px;
+            outline: none;
+            cursor: pointer;
         }
 
-        .row.cur {
-            color: var(--g)
+        #lang:hover {
+            color: white;
+            background: var(--surface-3);
         }
 
-        .sub {
-            color: var(--mut);
-            font-size: 12px
+        .strict {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            height: 42px;
+            padding: 0 13px;
+            color: var(--text-2);
+            background: var(--surface-2);
+            border-radius: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .strict input {
+            accent-color: var(--accent);
+        }
+
+        /* =========================
+           HERO
+        ========================== */
+
+        .hero {
+            position: relative;
+            margin: 8px 30px 24px;
+            min-height: 250px;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            border-radius: 20px;
+            background:
+                linear-gradient(120deg, rgba(29, 215, 96, .28), rgba(29, 215, 96, .04)),
+                linear-gradient(135deg, #222, #111);
+            box-shadow: var(--shadow);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: -50%;
+            background:
+                radial-gradient(circle, rgba(255, 255, 255, .08) 0 1px, transparent 1px);
+            background-size: 22px 22px;
+            opacity: .25;
+            animation: heroPattern 20s linear infinite;
+        }
+
+        @keyframes heroPattern {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(80px, 80px);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            padding: 35px;
+            max-width: 700px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(30px, 4vw, 54px);
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            max-width: 580px;
+            margin: 14px 0 0;
+            color: rgba(255, 255, 255, .68);
+            line-height: 1.6;
+        }
+
+        /* =========================
+           CONTENT GRID
+        ========================== */
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(340px, .9fr);
+            gap: 20px;
+            padding: 0 30px;
+        }
+
+        .panel {
+            min-width: 0;
+            background: linear-gradient(145deg,
+                    rgba(255, 255, 255, .045),
+                    rgba(255, 255, 255, .018));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .panel-subtitle {
+            margin-top: 4px;
+            color: var(--text-3);
+            font-size: 12px;
+        }
+
+        .count {
+            padding: 5px 9px;
+            color: var(--text-3);
+            background: var(--surface);
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .list {
+            padding: 8px;
+            max-height: 60vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .list::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        /* =========================
+           SONG ROW
+        ========================== */
+
+        .song {
+            position: relative;
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 13px;
+            padding: 9px 11px;
+            min-height: 62px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition:
+                background .2s ease,
+                transform .2s ease;
+            animation: songIn .35s ease both;
+        }
+
+        @keyframes songIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .song:hover {
+            background: var(--surface-2);
+            transform: translateX(3px);
+        }
+
+        .song.current {
+            background:
+                linear-gradient(90deg,
+                    rgba(29, 215, 96, .13),
+                    rgba(29, 215, 96, .035));
+        }
+
+        .song-number {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            color: var(--text-3);
+            background: var(--surface);
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .song.current .song-number {
+            color: var(--accent);
+        }
+
+        .song-info {
+            min-width: 0;
+        }
+
+        .song-title {
+            overflow: hidden;
+            color: white;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .song.current .song-title {
+            color: var(--accent);
+        }
+
+        .song-meta {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+            overflow: hidden;
+            color: var(--text-3);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .song-meta span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-tags {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
         }
 
         .tag {
-            font-size: 11px;
-            background: #333;
-            border-radius: 10px;
-            padding: 2px 8px;
-            margin-left: 4px;
-            white-space: nowrap
+            padding: 4px 8px;
+            color: #bbb;
+            background: #252525;
+            border: 1px solid rgba(255, 255, 255, .04);
+            border-radius: 20px;
+            font-size: 10px;
+            white-space: nowrap;
         }
 
-        footer {
+        .score {
+            color: var(--accent);
+            background: rgba(29, 215, 96, .09);
+        }
+
+        .duration {
+            min-width: 40px;
+            color: var(--text-3);
+            font-size: 11px;
+            text-align: right;
+        }
+
+        /* =========================
+           EMPTY / LOADING
+        ========================== */
+
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            padding: 30px;
+            color: var(--text-3);
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 56px;
+            height: 56px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 14px;
+            color: var(--text-2);
+            background: var(--surface);
+            border-radius: 50%;
+            font-size: 23px;
+        }
+
+        .empty strong {
+            color: var(--text-2);
+        }
+
+        .empty p {
+            max-width: 350px;
+            margin: 8px 0 0;
+            line-height: 1.5;
+        }
+
+        .skeleton {
+            height: 62px;
+            margin: 5px 0;
+            border-radius: 10px;
+            background:
+                linear-gradient(90deg,
+                    #181818 25%,
+                    #242424 50%,
+                    #181818 75%);
+            background-size: 400% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        /* =========================
+           TOAST
+        ========================== */
+
+        #toast-container {
             position: fixed;
-            bottom: 0;
+            top: 75px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: min(360px, calc(100vw - 30px));
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 13px 15px;
+            color: white;
+            background: rgba(25, 25, 25, .94);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(15px);
+            animation: toastIn .3s ease both;
+            pointer-events: auto;
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        .toast.hide {
+            animation: toastOut .25s ease forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px) scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: translateX(30px) scale(.96);
+            }
+        }
+
+        /* =========================
+           PLAYER
+        ========================== */
+
+        .player {
+            position: fixed;
             left: 0;
             right: 0;
-            background: #000;
-            padding: 12px 20px;
+            bottom: 0;
+            z-index: 50;
+            min-height: var(--player-height);
+            display: grid;
+            grid-template-columns: minmax(220px, .8fr) minmax(300px, 1.5fr) minmax(150px, .8fr);
+            align-items: center;
+            gap: 20px;
+            padding: 10px 22px;
+            background: rgba(9, 9, 9, .95);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, .4);
+            backdrop-filter: blur(22px);
+        }
+
+        .now-playing {
             display: flex;
-            gap: 16px;
-            align-items: center
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
         }
 
-        audio {
-            flex: 1
+        .album-art {
+            width: 56px;
+            height: 56px;
+            flex: 0 0 56px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            color: rgba(255, 255, 255, .65);
+            background:
+                linear-gradient(135deg, #222, #111);
+            border-radius: 6px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .4);
         }
 
-        label {
-            color: var(--mut);
-            white-space: nowrap
+        .album-art.playing {
+            animation: artPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes artPulse {
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        .now-text {
+            min-width: 0;
+        }
+
+        .now-title {
+            overflow: hidden;
+            font-weight: 650;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .now-artist {
+            margin-top: 4px;
+            overflow: hidden;
+            color: var(--text-3);
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-center {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            color: var(--text-2);
+            background: transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition:
+                color .2s ease,
+                background .2s ease,
+                transform .15s ease;
+        }
+
+        .control:hover {
+            color: white;
+            background: var(--surface-2);
+            transform: scale(1.08);
+        }
+
+        .control:active {
+            transform: scale(.92);
+        }
+
+        .control.main {
+            width: 38px;
+            height: 38px;
+            color: #000;
+            background: white;
+            font-size: 15px;
+        }
+
+        .control.main:hover {
+            color: #000;
+            background: white;
+            transform: scale(1.08);
+        }
+
+        .progress {
+            width: min(100%, 600px);
+            display: grid;
+            grid-template-columns: 35px 1fr 35px;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-3);
+            font-size: 10px;
+        }
+
+        .progress input[type=range] {
+            width: 100%;
+            accent-color: white;
+            cursor: pointer;
+        }
+
+        .volume {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume input {
+            width: 100px;
+            accent-color: white;
+        }
+
+        /* =========================
+           MOBILE NAV
+        ========================== */
+
+        .mobile-nav {
+            display: none;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1100px) {
+            .music-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .list {
+                max-height: 48vh;
+            }
+
+            .player {
+                grid-template-columns: 1fr 1.5fr 1fr;
+            }
+        }
+
+        @media (max-width: 800px) {
+            :root {
+                --player-height: 145px;
+            }
+
+            body {
+                padding-bottom: 155px;
+            }
+
+            .app {
+                display: block;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .content {
+                width: 100%;
+            }
+
+            .topbar {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .filters {
+                display: none;
+            }
+
+            .hero {
+                min-height: 230px;
+                margin: 8px 14px 18px;
+                border-radius: 16px;
+            }
+
+            .hero-content {
+                padding: 25px;
+            }
+
+            .hero h1 {
+                font-size: 35px;
+            }
+
+            .music-grid {
+                padding: 0 14px;
+            }
+
+            .panel {
+                border-radius: 13px;
+            }
+
+            .panel-header {
+                padding: 15px;
+            }
+
+            .list {
+                max-height: 55vh;
+                padding: 5px;
+            }
+
+            .song {
+                grid-template-columns: 38px minmax(0, 1fr) auto;
+                gap: 10px;
+            }
+
+            .song-tags .tag:not(.score) {
+                display: none;
+            }
+
+            .mobile-nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 60;
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+                background: rgba(8, 8, 8, .96);
+                border-top: 1px solid var(--border);
+                backdrop-filter: blur(20px);
+            }
+
+            .mobile-nav button {
+                min-width: 60px;
+                padding: 6px;
+                color: var(--text-3);
+                background: transparent;
+                cursor: pointer;
+                font-size: 10px;
+            }
+
+            .mobile-nav button span {
+                display: block;
+                margin-bottom: 3px;
+                font-size: 18px;
+            }
+
+            .mobile-nav button.active {
+                color: var(--accent);
+            }
+
+            .player {
+                bottom: 57px;
+                min-height: 88px;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 6px 10px;
+                padding: 8px 12px;
+            }
+
+            .now-playing {
+                min-width: 0;
+            }
+
+            .album-art {
+                width: 46px;
+                height: 46px;
+                flex-basis: 46px;
+            }
+
+            .player-center {
+                display: flex;
+                align-items: flex-end;
+            }
+
+            .progress {
+                position: absolute;
+                left: 10px;
+                right: 10px;
+                bottom: 2px;
+                width: auto;
+                grid-template-columns: 30px 1fr 30px;
+            }
+
+            .controls {
+                gap: 3px;
+            }
+
+            .controls .control:nth-child(1),
+            .controls .control:nth-child(3) {
+                display: none;
+            }
+
+            .volume {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                min-height: 210px;
+            }
+
+            .hero-content {
+                padding: 21px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .hero p {
+                font-size: 12px;
+            }
+
+            .song {
+                min-height: 58px;
+                padding: 8px;
+            }
+
+            .song-tags {
+                display: none;
+            }
+
+            .duration {
+                display: none;
+            }
+
+            .panel-title {
+                font-size: 15px;
+            }
+
+            .count {
+                display: none;
+            }
+        }
+
+        /* =========================
+           ACCESSIBILITY
+        ========================== */
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
         }
     </style>
 </head>
 
 <body>
-    <header><input type="text" id="q" placeholder="Search songs…" autofocus>
-        <select id="lang">
-            <option value="">All languages</option>
-        </select>
-        <label><input type="checkbox" id="strict"> strict language</label>
-    </header>
-    <main>
-        <section>
-            <h2>Library</h2>
-            <div id="lib"></div>
-        </section>
-        <section>
-            <h2>Up next — similar to <span id="seed">…</span></h2>
-            <div id="rec"></div>
-        </section>
-    </main>
-    <footer>
-        <div id="now" style="min-width:220px">Nothing playing</div><audio id="a" controls></audio>
+
+    <div class="app">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">♫</div>
+                <span>MusicRec</span>
+            </div>
+
+            <div class="nav-title">Discover</div>
+
+            <nav class="nav">
+                <button class="active" data-section="home">
+                    <span class="nav-icon">⌂</span>
+                    Home
+                </button>
+
+                <button data-section="library">
+                    <span class="nav-icon">▤</span>
+                    Library
+                </button>
+
+                <button data-section="recommendations">
+                    <span class="nav-icon">✦</span>
+                    Recommendations
+                </button>
+            </nav>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+
+            <header class="topbar" id="topbar">
+
+                <div class="search-wrap">
+                    <span class="search-icon">⌕</span>
+
+                    <input id="q" type="search" placeholder="What do you want to listen to?" autocomplete="off"
+                        spellcheck="false" autofocus>
+
+                    <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search">
+                        ×
+                    </button>
+                </div>
+
+                <div class="filters">
+
+                    <select id="lang" aria-label="Language">
+                        <option value="">All languages</option>
+                    </select>
+
+                    <label class="strict">
+                        <input type="checkbox" id="strict">
+                        Strict
+                    </label>
+
+                </div>
+
+            </header>
+
+            <!-- HERO -->
+            <section class="hero">
+
+                <div class="hero-content">
+
+                    <div class="eyebrow">Your personal music discovery</div>
+
+                    <h1>Find your next<br>favorite song.</h1>
+
+                    <p>
+                        Search your library, explore songs, and let MusicRec
+                        build recommendations based on what you listen to.
+                    </p>
+
+                </div>
+
+            </section>
+
+            <!-- MUSIC -->
+            <main class="music-grid">
+
+                <!-- LIBRARY -->
+                <section class="panel" id="libraryPanel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2 class="panel-title">Your Library</h2>
+                            <div class="panel-subtitle">
+                                Search and play your music
+                            </div>
+                        </div>
+
+                        <span class="count" id="libraryCount">0 songs</span>
+
+                    </div>
+
+                    <div class="list" id="lib">
+                        <div class="skeleton"></div>
+                        <div class="skeleton"></div>
+                        <div class="skeleton"></div>
+                        <div class="skeleton"></div>
+                        <div class="skeleton"></div>
+                    </div>
+
+                </section>
+
+                <!-- RECOMMENDATIONS -->
+                <section class="panel" id="recommendationPanel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2 class="panel-title">
+                                Up next
+                            </h2>
+
+                            <div class="panel-subtitle">
+                                Similar to
+                                <strong id="seed">nothing yet</strong>
+                            </div>
+                        </div>
+
+                        <span class="count" id="recCount">0 songs</span>
+
+                    </div>
+
+                    <div class="list" id="rec">
+
+                        <div class="empty">
+                            <div class="empty-icon">✦</div>
+                            <strong>Recommendations appear here</strong>
+                            <p>
+                                Play a song and MusicRec will find tracks
+                                that sound similar.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- PLAYER -->
+    <footer class="player">
+
+        <div class="now-playing">
+
+            <div class="album-art" id="albumArt">
+                ♪
+            </div>
+
+            <div class="now-text">
+
+                <div class="now-title" id="now">
+                    Nothing playing
+                </div>
+
+                <div class="now-artist" id="nowArtist">
+                    Choose a song to start listening
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="player-center">
+
+            <div class="controls">
+
+                <button class="control" id="prevBtn" title="Previous">
+                    ↶
+                </button>
+
+                <button class="control" id="shuffleBtn" title="Shuffle">
+                    ⤨
+                </button>
+
+                <button class="control main" id="playBtn" title="Play">
+                    ▶
+                </button>
+
+                <button class="control" id="nextBtn" title="Next">
+                    ↷
+                </button>
+
+                <button class="control" id="repeatBtn" title="Repeat">
+                    ↻
+                </button>
+
+            </div>
+
+            <div class="progress">
+
+                <span id="currentTime">0:00</span>
+
+                <input id="seek" type="range" min="0" max="100" value="0" step=".1" aria-label="Seek">
+
+                <span id="duration">0:00</span>
+
+            </div>
+
+        </div>
+
+        <div class="volume">
+
+            <span id="volumeIcon">🔊</span>
+
+            <input id="volume" type="range" min="0" max="1" step=".01" value="1" aria-label="Volume">
+
+        </div>
+
+        <audio id="a" preload="metadata"></audio>
+
     </footer>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
+
+        <button class="active">
+            <span>⌂</span>
+            Home
+        </button>
+
+        <button onclick="document.getElementById('libraryPanel').scrollIntoView({behavior:'smooth'})">
+            <span>▤</span>
+            Library
+        </button>
+
+        <button onclick="document.getElementById('recommendationPanel').scrollIntoView({behavior:'smooth'})">
+            <span>✦</span>
+            Discover
+        </button>
+
+    </nav>
+
+    <!-- TOASTS -->
+    <div id="toast-container"></div>
+
     <script>
-        const $ = s => document.querySelector(s), a = $('#a');
-        const session = localStorage.sid || (localStorage.sid = crypto.randomUUID());
-        let recent = [], queue = [], cur = null;
-        const fmt = s => s ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '';
-        const esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-        const row = (s, extra = '') => `<div class="row ${cur == s.id ? 'cur' : ''}" data-id="${s.id}"><div>${esc(s.title)}<div class="sub">${esc(s.artist || s.folder)} · ${esc(s.lang_guess.join(', '))}</div></div>
-<div><span class="tag">${esc(s.language)}</span><span class="tag">${esc(s.mood)}</span>${extra}<span class="sub"> ${fmt(s.duration)}</span></div></div>`;
-        const j = async (u, o) => (await fetch(u, o)).json();
+        /* =========================================================
+           MUSICREC CLIENT
+        ========================================================== */
+
+        const $ = selector => document.querySelector(selector);
+
+        const a = $('#a');
+
+        const session =
+            localStorage.getItem('musicrec_sid') ||
+            (() => {
+                const id = crypto.randomUUID();
+                localStorage.setItem('musicrec_sid', id);
+                return id;
+            })();
+
+        let recent = [];
+        let queue = [];
+        let library = [];
+
+        let cur = null;
+        let currentSong = null;
+
+        let searchTimer = null;
+        let searchController = null;
+
+        let shuffle = false;
+        let repeat = false;
+
+        let isSeeking = false;
+
+        /* =========================================================
+           HELPERS
+        ========================================================== */
+
+        const fmt = seconds => {
+
+            if (!Number.isFinite(Number(seconds))) {
+                return '0:00';
+            }
+
+            seconds = Math.max(0, Number(seconds));
+
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+
+            return `${minutes}:${String(secs).padStart(2, '0')}`;
+        };
+
+        const esc = value => {
+
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        };
+
+        const safeArray = value =>
+            Array.isArray(value) ? value : [];
+
+        /* =========================================================
+           TOASTS
+        ========================================================== */
+
+        function toast(message, type = 'error', duration = 4000) {
+
+            const container = $('#toast-container');
+
+            const el = document.createElement('div');
+
+            el.className = `toast ${type}`;
+
+            el.innerHTML = `
+                <span>${type === 'error' ? '⚠' : type === 'warning' ? '!' : '✓'}</span>
+                <div>${esc(message)}</div>
+            `;
+
+            container.appendChild(el);
+
+            setTimeout(() => {
+
+                el.classList.add('hide');
+
+                setTimeout(() => {
+                    el.remove();
+                }, 300);
+
+            }, duration);
+        }
+
+        /* =========================================================
+           API
+        ========================================================== */
+
+        async function api(url, options = {}) {
+
+            try {
+
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        ...(options.headers || {}),
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+
+                    let message = `Request failed (${response.status})`;
+
+                    try {
+
+                        const data = await response.json();
+
+                        if (data?.error) {
+                            message = data.error;
+                        }
+
+                    } catch (_) { }
+
+                    throw new Error(message);
+                }
+
+                const contentType =
+                    response.headers.get('content-type') || '';
+
+                if (!contentType.includes('application/json')) {
+                    throw new Error('Server returned an invalid response.');
+                }
+
+                return await response.json();
+
+            } catch (error) {
+
+                if (error.name === 'AbortError') {
+                    throw error;
+                }
+
+                console.error(error);
+
+                throw error;
+            }
+        }
+
+        async function postPlay(body) {
+
+            try {
+
+                await fetch('/api/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+            } catch (error) {
+
+                /*
+                 * Analytics/play-history failure should not
+                 * stop the music from playing.
+                 */
+
+                console.warn('Play tracking failed:', error);
+            }
+        }
+
+        /* =========================================================
+           SONG ROW
+        ========================================================== */
+
+        function songRow(song, index, extra = '') {
+
+            const languages =
+                safeArray(song.lang_guess).join(', ');
+
+            const isCurrent =
+                String(cur) === String(song.id);
+
+            const title =
+                song.title || 'Unknown title';
+
+            const artist =
+                song.artist ||
+                song.folder ||
+                'Unknown artist';
+
+            return `
+                <div
+                    class="song ${isCurrent ? 'current' : ''}"
+                    data-id="${esc(song.id)}"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Play ${esc(title)}"
+                    style="animation-delay:${Math.min(index * 20, 300)}ms"
+                >
+
+                    <div class="song-number">
+                        ${isCurrent ? '♫' : index + 1}
+                    </div>
+
+                    <div class="song-info">
+
+                        <div class="song-title">
+                            ${esc(title)}
+                        </div>
+
+                        <div class="song-meta">
+                            <span>${esc(artist)}</span>
+                            ${languages ? `<span>•</span><span>${esc(languages)}</span>` : ''}
+                        </div>
+
+                    </div>
+
+                    <div class="song-tags">
+
+                        ${song.language
+                    ? `<span class="tag">${esc(song.language)}</span>`
+                    : ''
+                }
+
+                        ${song.mood
+                    ? `<span class="tag">${esc(song.mood)}</span>`
+                    : ''
+                }
+
+                        ${extra}
+
+                        <span class="duration">
+                            ${fmt(song.duration)}
+                        </span>
+
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function bindSongs(container, songs) {
+
+            container
+                .querySelectorAll('.song')
+                .forEach(element => {
+
+                    const play = () => {
+
+                        const song =
+                            songs.find(
+                                item =>
+                                    String(item.id) ===
+                                    String(element.dataset.id)
+                            );
+
+                        if (song) {
+                            playSong(song);
+                        }
+                    };
+
+                    element.addEventListener('click', play);
+
+                    element.addEventListener('keydown', event => {
+
+                        if (
+                            event.key === 'Enter' ||
+                            event.key === ' '
+                        ) {
+
+                            event.preventDefault();
+                            play();
+                        }
+                    });
+                });
+        }
+
+        /* =========================================================
+           SEARCH
+        ========================================================== */
+
+        function showLoading(container) {
+
+            container.innerHTML = `
+                ${Array.from({ length: 7 })
+                    .map(() => '<div class="skeleton"></div>')
+                    .join('')}
+            `;
+        }
+
         async function search() {
-            const r = await j(`/api/search?q=${encodeURIComponent($('#q').value)}&language=${encodeURIComponent($('#lang').value)}&limit=60`);
-            $('#lib').innerHTML = r.map(s => row(s)).join(''); bind('#lib', r)
+
+            const query = $('#q').value.trim();
+            const language = $('#lang').value;
+
+            if (searchController) {
+                searchController.abort();
+            }
+
+            searchController = new AbortController();
+
+            showLoading($('#lib'));
+
+            try {
+
+                const url =
+                    `/api/search?q=${encodeURIComponent(query)}` +
+                    `&language=${encodeURIComponent(language)}` +
+                    `&limit=60`;
+
+                const response =
+                    await fetch(url, {
+                        signal: searchController.signal,
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    });
+
+                if (!response.ok) {
+                    throw new Error(`Search failed (${response.status})`);
+                }
+
+                const data = await response.json();
+
+                library =
+                    Array.isArray(data)
+                        ? data
+                        : Array.isArray(data.results)
+                            ? data.results
+                            : [];
+
+                renderLibrary();
+
+            } catch (error) {
+
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
+                console.error(error);
+
+                $('#lib').innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">⚠</div>
+                        <strong>Couldn't load your library</strong>
+                        <p>
+                            Check your connection or make sure the
+                            MusicRec server is running.
+                        </p>
+                    </div>
+                `;
+
+                toast(error.message || 'Search failed.');
+            }
         }
-        function bind(sel, list) { document.querySelectorAll(sel + ' .row').forEach(e => e.onclick = () => play(list.find(x => x.id == e.dataset.id))) }
-        const post = b => fetch('/api/play', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
-        async function play(s) {
-            cur = s.id; a.src = '/api/stream/' + s.id; a.play(); $('#now').textContent = s.title; $('#seed').textContent = s.title;
-            const seeds = recent.slice(-3).reverse().join(','); recent.push(s.id); post({ session, song: s.id });
-            queue = await j(`/api/similar/${s.id}?k=25&strict_language=${$('#strict').checked}&seeds=${seeds}`);
-            $('#rec').innerHTML = queue.map(x => row(x, `<span class="tag">${x.score}</span>`)).join(''); bind('#rec', queue)
+
+        function renderLibrary() {
+
+            $('#libraryCount').textContent =
+                `${library.length} ${library.length === 1 ? 'song' : 'songs'}`;
+
+            if (!library.length) {
+
+                $('#lib').innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">⌕</div>
+                        <strong>No songs found</strong>
+                        <p>
+                            Try another search term or remove your
+                            language filter.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            $('#lib').innerHTML =
+                library
+                    .map((song, index) =>
+                        songRow(song, index)
+                    )
+                    .join('');
+
+            bindSongs($('#lib'), library);
         }
-        a.onended = () => { post({ session, song: cur, completed: true }); if (queue.length) play(queue.shift()) };
-        $('#q').oninput = search; $('#lang').onchange = search;
-        (async () => { const st = await j('/api/languages'); Object.keys(st).sort().forEach(l => $('#lang').insertAdjacentHTML('beforeend', `<option value="${esc(l)}">${esc(l)} (${st[l].count})</option>`)); search() })();
+
+        function scheduleSearch() {
+
+            clearTimeout(searchTimer);
+
+            searchTimer = setTimeout(search, 250);
+        }
+
+        /* =========================================================
+           PLAY SONG
+        ========================================================== */
+
+        async function playSong(song) {
+
+            if (!song || song.id == null) {
+                toast('This song cannot be played.');
+                return;
+            }
+
+            currentSong = song;
+            cur = song.id;
+
+            $('#now').textContent =
+                song.title || 'Unknown title';
+
+            $('#nowArtist').textContent =
+                song.artist ||
+                song.folder ||
+                'Unknown artist';
+
+            $('#seed').textContent =
+                song.title || 'this song';
+
+            $('#albumArt').classList.add('playing');
+
+            updatePlayButton(true);
+            renderLibrary();
+
+            try {
+
+                a.pause();
+
+                a.src =
+                    `/api/stream/${encodeURIComponent(song.id)}`;
+
+                a.currentTime = 0;
+
+                await a.play();
+
+            } catch (error) {
+
+                console.error('Playback failed:', error);
+
+                updatePlayButton(false);
+
+                toast(
+                    'Unable to play this song. The audio file may be unavailable.',
+                    'error'
+                );
+
+                return;
+            }
+
+            recent.push(song.id);
+
+            if (recent.length > 20) {
+                recent.shift();
+            }
+
+            postPlay({
+                session,
+                song: song.id
+            });
+
+            await loadRecommendations(song);
+        }
+
+        /* =========================================================
+           RECOMMENDATIONS
+        ========================================================== */
+
+        async function loadRecommendations(song) {
+
+            $('#rec').innerHTML = `
+                ${Array.from({ length: 5 })
+                    .map(() => '<div class="skeleton"></div>')
+                    .join('')}
+            `;
+
+            try {
+
+                const seeds =
+                    recent
+                        .slice(-3)
+                        .reverse()
+                        .join(',');
+
+                const url =
+                    `/api/similar/${encodeURIComponent(song.id)}` +
+                    `?k=25` +
+                    `&strict_language=${$('#strict').checked}` +
+                    `&seeds=${encodeURIComponent(seeds)}`;
+
+                const data = await api(url);
+
+                queue =
+                    Array.isArray(data)
+                        ? data
+                        : Array.isArray(data.results)
+                            ? data.results
+                            : [];
+
+                renderRecommendations();
+
+            } catch (error) {
+
+                console.error(error);
+
+                queue = [];
+
+                $('#rec').innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">⚠</div>
+                        <strong>Recommendations unavailable</strong>
+                        <p>
+                            We couldn't generate recommendations
+                            right now. Try playing the song again.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRecommendations() {
+
+            $('#recCount').textContent =
+                `${queue.length} ${queue.length === 1 ? 'song' : 'songs'}`;
+
+            if (!queue.length) {
+
+                $('#rec').innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">✦</div>
+                        <strong>No recommendations yet</strong>
+                        <p>
+                            Try another song to discover similar music.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            $('#rec').innerHTML =
+                queue
+                    .map((song, index) => {
+
+                        const score =
+                            song.score != null
+                                ? `<span class="tag score">${esc(song.score)}</span>`
+                                : '';
+
+                        return songRow(
+                            song,
+                            index,
+                            score
+                        );
+                    })
+                    .join('');
+
+            bindSongs($('#rec'), queue);
+        }
+
+        /* =========================================================
+           PLAYER
+        ========================================================== */
+
+        function updatePlayButton(playing) {
+
+            $('#playBtn').textContent =
+                playing ? 'Ⅱ' : '▶';
+
+            $('#playBtn').title =
+                playing ? 'Pause' : 'Play';
+        }
+
+        function togglePlay() {
+
+            if (!currentSong) {
+
+                if (library.length) {
+                    playSong(library[0]);
+                } else {
+                    toast('Choose a song first.', 'warning');
+                }
+
+                return;
+            }
+
+            if (a.paused) {
+
+                a.play()
+                    .then(() => updatePlayButton(true))
+                    .catch(() =>
+                        toast('Unable to resume playback.')
+                    );
+
+            } else {
+
+                a.pause();
+            }
+        }
+
+        function nextSong() {
+
+            if (!queue.length) {
+
+                if (library.length) {
+
+                    const index =
+                        library.findIndex(
+                            song =>
+                                String(song.id) === String(cur)
+                        );
+
+                    if (index >= 0 && library[index + 1]) {
+                        playSong(library[index + 1]);
+                        return;
+                    }
+                }
+
+                toast('No next song in the queue.', 'warning');
+                return;
+            }
+
+            let index = 0;
+
+            if (shuffle) {
+                index = Math.floor(Math.random() * queue.length);
+            }
+
+            const next = queue.splice(index, 1)[0];
+
+            renderRecommendations();
+
+            playSong(next);
+        }
+
+        function previousSong() {
+
+            if (recent.length < 2) {
+                a.currentTime = 0;
+                return;
+            }
+
+            recent.pop();
+
+            const previousId =
+                recent[recent.length - 1];
+
+            const song =
+                library.find(
+                    item =>
+                        String(item.id) === String(previousId)
+                );
+
+            if (song) {
+                playSong(song);
+            } else {
+                a.currentTime = 0;
+            }
+        }
+
+        /* =========================================================
+           AUDIO EVENTS
+        ========================================================== */
+
+        a.addEventListener('play', () => {
+
+            updatePlayButton(true);
+
+            $('#albumArt')
+                .classList
+                .add('playing');
+        });
+
+        a.addEventListener('pause', () => {
+
+            updatePlayButton(false);
+
+            $('#albumArt')
+                .classList
+                .remove('playing');
+        });
+
+        a.addEventListener('loadedmetadata', () => {
+
+            $('#duration').textContent =
+                fmt(a.duration);
+
+            $('#seek').max =
+                Number.isFinite(a.duration)
+                    ? a.duration
+                    : 100;
+        });
+
+        a.addEventListener('timeupdate', () => {
+
+            if (isSeeking) return;
+
+            $('#currentTime').textContent =
+                fmt(a.currentTime);
+
+            $('#seek').value =
+                a.duration
+                    ? (a.currentTime / a.duration) * 100
+                    : 0;
+        });
+
+        a.addEventListener('error', () => {
+
+            if (!currentSong) return;
+
+            updatePlayButton(false);
+
+            toast(
+                'Audio could not be loaded.',
+                'error'
+            );
+        });
+
+        a.addEventListener('ended', async () => {
+
+            if (cur != null) {
+
+                postPlay({
+                    session,
+                    song: cur,
+                    completed: true
+                });
+            }
+
+            if (repeat && currentSong) {
+
+                a.currentTime = 0;
+
+                try {
+                    await a.play();
+                } catch (_) { }
+
+                return;
+            }
+
+            nextSong();
+        });
+
+        /* =========================================================
+           SEEK
+        ========================================================== */
+
+        $('#seek').addEventListener('input', event => {
+
+            isSeeking = true;
+
+            if (a.duration) {
+
+                const time =
+                    (Number(event.target.value) / 100) *
+                    a.duration;
+
+                $('#currentTime').textContent =
+                    fmt(time);
+            }
+        });
+
+        $('#seek').addEventListener('change', event => {
+
+            if (a.duration) {
+
+                a.currentTime =
+                    (Number(event.target.value) / 100) *
+                    a.duration;
+            }
+
+            isSeeking = false;
+        });
+
+        /* =========================================================
+           VOLUME
+        ========================================================== */
+
+        $('#volume').addEventListener('input', event => {
+
+            a.volume =
+                Number(event.target.value);
+
+            $('#volumeIcon').textContent =
+                a.volume === 0
+                    ? '🔇'
+                    : a.volume < .5
+                        ? '🔉'
+                        : '🔊';
+        });
+
+        /* =========================================================
+           PLAYER BUTTONS
+        ========================================================== */
+
+        $('#playBtn').onclick = togglePlay;
+
+        $('#nextBtn').onclick = nextSong;
+
+        $('#prevBtn').onclick = previousSong;
+
+        $('#shuffleBtn').onclick = () => {
+
+            shuffle = !shuffle;
+
+            $('#shuffleBtn').style.color =
+                shuffle
+                    ? 'var(--accent)'
+                    : '';
+
+            toast(
+                shuffle
+                    ? 'Shuffle enabled'
+                    : 'Shuffle disabled',
+                'success',
+                1800
+            );
+        };
+
+        $('#repeatBtn').onclick = () => {
+
+            repeat = !repeat;
+
+            $('#repeatBtn').style.color =
+                repeat
+                    ? 'var(--accent)'
+                    : '';
+
+            toast(
+                repeat
+                    ? 'Repeat enabled'
+                    : 'Repeat disabled',
+                'success',
+                1800
+            );
+        };
+
+        /* =========================================================
+           SEARCH UI
+        ========================================================== */
+
+        $('#q').addEventListener('input', () => {
+
+            $('#clearSearch').style.display =
+                $('#q').value
+                    ? 'block'
+                    : 'none';
+
+            scheduleSearch();
+        });
+
+        $('#clearSearch').onclick = () => {
+
+            $('#q').value = '';
+
+            $('#clearSearch').style.display =
+                'none';
+
+            search();
+            $('#q').focus();
+        };
+
+        $('#lang').addEventListener(
+            'change',
+            search
+        );
+
+        $('#strict').addEventListener(
+            'change',
+            () => {
+
+                if (currentSong) {
+                    loadRecommendations(currentSong);
+                }
+            }
+        );
+
+        /* =========================================================
+           KEYBOARD SHORTCUTS
+        ========================================================== */
+
+        document.addEventListener('keydown', event => {
+
+            const target =
+                event.target;
+
+            const typing =
+                target instanceof HTMLInputElement ||
+                target instanceof HTMLTextAreaElement ||
+                target instanceof HTMLSelectElement;
+
+            if (typing) return;
+
+            switch (event.code) {
+
+                case 'Space':
+
+                    event.preventDefault();
+                    togglePlay();
+                    break;
+
+                case 'ArrowRight':
+
+                    if (a.duration) {
+                        a.currentTime =
+                            Math.min(
+                                a.duration,
+                                a.currentTime + 5
+                            );
+                    }
+
+                    break;
+
+                case 'ArrowLeft':
+
+                    if (a.duration) {
+                        a.currentTime =
+                            Math.max(
+                                0,
+                                a.currentTime - 5
+                            );
+                    }
+
+                    break;
+
+                case 'KeyN':
+                    nextSong();
+                    break;
+
+                case 'KeyP':
+                    previousSong();
+                    break;
+
+                case 'KeyM':
+
+                    a.muted = !a.muted;
+
+                    $('#volumeIcon').textContent =
+                        a.muted
+                            ? '🔇'
+                            : '🔊';
+
+                    break;
+            }
+        });
+
+        /* =========================================================
+           SCROLL EFFECT
+        ========================================================== */
+
+        window.addEventListener(
+            'scroll',
+            () => {
+
+                $('#topbar')
+                    .classList
+                    .toggle(
+                        'scrolled',
+                        window.scrollY > 20
+                    );
+
+            },
+            { passive: true }
+        );
+
+        /* =========================================================
+           LANGUAGES
+        ========================================================== */
+
+        async function loadLanguages() {
+
+            try {
+
+                const data =
+                    await api('/api/languages');
+
+                if (!data || typeof data !== 'object') {
+                    return;
+                }
+
+                Object
+                    .keys(data)
+                    .sort()
+                    .forEach(language => {
+
+                        const option =
+                            document.createElement('option');
+
+                        option.value = language;
+
+                        option.textContent =
+                            `${language} (${data[language]?.count ?? 0})`;
+
+                        $('#lang').appendChild(option);
+                    });
+
+            } catch (error) {
+
+                console.warn(
+                    'Language loading failed:',
+                    error
+                );
+
+                /*
+                 * Language filter is optional.
+                 * Don't block the entire application.
+                 */
+            }
+        }
+
+        /* =========================================================
+           INITIALIZATION
+        ========================================================== */
+
+        async function init() {
+
+            try {
+
+                await loadLanguages();
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+            await search();
+        }
+
+        init();
+
     </script>
+
 </body>
 
 </html>
