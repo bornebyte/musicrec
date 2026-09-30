@@ -1,6 +1,19 @@
 #!/bin/bash
-docker compose build app                                   # only the last layer rebuilds, seconds
-docker compose run --rm app python -m musicrec extract --retry   # the 3 failed files, ~1 min
+set -e
+
+docker compose build app
+
+# Always synchronize filesystem -> database first
+docker compose run --rm app python -m musicrec scan
+
+# Process new/changed/failed songs
+docker compose run --rm app python -m musicrec extract --retry
+
+# Rebuild embeddings / language / mood
 docker compose run --rm app python -m musicrec build
+
+# Show database/pipeline status
 docker compose run --rm app python -m musicrec report
-docker compose up -d app                                   # http://localhost:8000
+
+# Start API
+docker compose up -d app

@@ -24,7 +24,7 @@ class Recommender:
     def search(self, q="", limit=40, language=None):
         q = (q or "").strip().lower()
         hay = "lower(title || ' ' || artist || ' ' || folder)"
-        where, params = ["embedding IS NOT NULL"], {"q": q, "n": limit}
+        where, params = [], {"q": q, "n": limit}
         if language:
             where.append("lang_name = %(lang)s"); params["lang"] = language
         if q:
